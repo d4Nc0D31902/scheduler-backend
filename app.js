@@ -14,21 +14,20 @@ const borrows = require("./routes/borrow");
 const auth = require("./routes/auth");
 const order = require("./routes/order");
 const errorMiddleware = require("./middlewares/errors");
+
+// Middleware setup
 app.use(express.json({ limit: "100mb" }));
-// app.set("trust proxy", 1);
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
+
+// CORS middleware
 app.use(
-  // cors({
-  //   origin: "http://localhost:3000",
-  //   credentials: true,
-  // })
   cors({
     origin: "https://scheduler-frontend-mu.vercel.app",
     credentials: true,
   })
 );
-app.use(cookieParser());
-app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
+// Routes
 app.use("/api/v1", products);
 app.use("/api/v1", auth);
 app.use("/api/v1", order);
@@ -41,5 +40,10 @@ app.use("/api/v1", sports);
 app.use("/api/v1", categories);
 app.use("/api/v1", borrows);
 
+// Apply cookie parser middleware
+app.use(cookieParser());
+
+// Error handling middleware
 app.use(errorMiddleware);
+
 module.exports = app;
