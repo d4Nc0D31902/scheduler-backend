@@ -16,10 +16,7 @@ const auth = require("./routes/auth");
 const order = require("./routes/order");
 const errorMiddleware = require("./middlewares/errors");
 
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ limit: "100mb", extended: true }));
-app.use(cookieParser());
-
+// Enable CORS at the top of the middleware chain
 app.use(
   cors({
     origin: "https://scheduler-frontend-mu.vercel.app",
@@ -27,6 +24,11 @@ app.use(
   })
 );
 
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
+app.use(cookieParser());
+
+// Define routes
 app.use("/api/v1", products);
 app.use("/api/v1", auth);
 app.use("/api/v1", order);
@@ -39,6 +41,7 @@ app.use("/api/v1", sports);
 app.use("/api/v1", categories);
 app.use("/api/v1", borrows);
 
+// Error middleware should be at the end
 app.use(errorMiddleware);
 
 module.exports = app;
