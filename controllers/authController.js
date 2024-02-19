@@ -73,6 +73,38 @@ exports.logout = async (req, res, next) => {
   });
 };
 
+// exports.forgotPassword = async (req, res, next) => {
+//   const user = await User.findOne({ email: req.body.email });
+//   if (!user) {
+//     return next(new ErrorHandler("User not found with this email", 404));
+//   }
+//   const resetToken = user.getResetPasswordToken();
+//   await user.save({ validateBeforeSave: false });
+//   const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+
+//   const message = `<p>Your password reset token is as follow:\n\n<a href="${resetUrl}">Reset Password</a>\n\nIf you have not requested this email, then ignore it.</p>`;
+
+//   const html = `<p>Your password reset token is as follow:\n\n<a href="${resetUrl}">Reset Password</a>\n\nIf you have not requested this email, then ignore it.</p>`;
+
+//   try {
+//     await sendEmail({
+//       email: user.email,
+//       subject: "ShopIT Password Recovery",
+//       message,
+//       html,
+//     });
+//     res.status(200).json({
+//       success: true,
+//       message: `Email sent to: ${user.email}`,
+//     });
+//   } catch (error) {
+//     user.resetPasswordToken = undefined;
+//     user.resetPasswordExpire = undefined;
+//     await user.save({ validateBeforeSave: false });
+//     return next(new ErrorHandler(error.message, 500));
+//   }
+// };
+
 exports.forgotPassword = async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
@@ -89,7 +121,7 @@ exports.forgotPassword = async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: "ShopIT Password Recovery",
+      subject: "TUP-T Scheduler Password Recovery",
       message,
       html,
     });
