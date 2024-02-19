@@ -22,7 +22,7 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 // CORS middleware
 app.use(
   cors({
-    origin: "https://scheduler-frontend-mu.vercel.app",
+    origin: "https://scheduler-frontend-lrh2j3gs3.vercel.app",
     credentials: true,
   })
 );
