@@ -433,151 +433,76 @@ exports.getSingleAppointment = async (req, res, next) => {
 //   }
 // };
 
-// exports.updateAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       title,
-//       location,
-//       timeStart,
-//       timeEnd,
-//       status,
-//       professor,
-//       reason,
-//       key,
-//     } = req.body;
+exports.updateAppointment = async (req, res, next) => {
+  try {
+    const {
+      attendees,
+      title,
+      location,
+      timeStart,
+      timeEnd,
+      status,
+      professor,
+      reason,
+      key,
+    } = req.body;
 
-//     const appointment = await Appointment.findById(req.params.id);
+    const appointment = await Appointment.findById(req.params.id);
 
-//     if (!appointment) {
-//       return next(new ErrorHandler("Appointment not found", 404));
-//     }
+    if (!appointment) {
+      return next(new ErrorHandler("Appointment not found", 404));
+    }
 
-//     const historyLog = {
-//       schedTitle: appointment.title,
-//       requester: appointment.requester,
-//       description: appointment.description,
-//       location: appointment.location,
-//       timeStart: appointment.timeStart,
-//       timeEnd: appointment.timeEnd,
-//       professor: professor,
-//       status: status,
-//       by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
-//     };
+    const historyLog = {
+      schedTitle: appointment.title,
+      requester: appointment.requester,
+      description: appointment.description,
+      location: appointment.location,
+      timeStart: appointment.timeStart,
+      timeEnd: appointment.timeEnd,
+      professor: professor,
+      status: status,
+      by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
+    };
 
-//     if (
-//       reason === "Reason 1" ||
-//       reason === "Reason 2" ||
-//       reason === "Reason 3"
-//     ) {
-//       const user = await User.findById(appointment.userId);
+    if (
+      reason === "Reason 1" ||
+      reason === "Reason 2" ||
+      reason === "Reason 3"
+    ) {
+      const user = await User.findById(appointment.userId);
 
-//       if (!user) {
-//         return next(new ErrorHandler("User not found", 404));
-//       }
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
 
-//       user.penalty += 1;
+      user.penalty += 1;
 
-//       await user.save();
-//     }
+      await user.save();
+    }
 
-//     appointment.attendees = attendees;
-//     appointment.title = title;
-//     appointment.location = location;
-//     appointment.timeStart = timeStart;
-//     appointment.timeEnd = timeEnd;
-//     appointment.status = status;
-//     appointment.professor = professor;
-//     appointment.reason = reason;
-//     appointment.key = key;
+    appointment.attendees = attendees;
+    appointment.title = title;
+    appointment.location = location;
+    appointment.timeStart = timeStart;
+    appointment.timeEnd = timeEnd;
+    appointment.status = status;
+    appointment.professor = professor;
+    appointment.reason = reason;
+    appointment.key = key;
 
-//     appointment.history.push(historyLog);
+    appointment.history.push(historyLog);
 
-//     await appointment.save();
+    await appointment.save();
 
-//     res.status(200).json({
-//       success: true,
-//       appointment: appointment,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to update the appointment", 500));
-//   }
-// };
-
-// exports.updateAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       title,
-//       location,
-//       timeStart,
-//       timeEnd,
-//       status,
-//       professor,
-//       reason,
-//       key,
-//     } = req.body;
-
-//     const appointment = await Appointment.findById(req.params.id);
-
-//     if (!appointment) {
-//       return next(new ErrorHandler("Appointment not found", 404));
-//     }
-
-//     const historyLog = {
-//       schedTitle: appointment.title,
-//       requester: appointment.requester,
-//       description: appointment.description,
-//       location: appointment.location,
-//       timeStart: appointment.timeStart,
-//       timeEnd: appointment.timeEnd,
-//       professor: professor,
-//       status: status,
-//       by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
-//     };
-
-//     if (
-//       reason === "Reason 1" ||
-//       reason === "Reason 2" ||
-//       reason === "Reason 3"
-//     ) {
-//       const user = await User.findById(appointment.userId);
-
-//       if (!user) {
-//         return next(new ErrorHandler("User not found", 404));
-//       }
-
-//       user.penalty += 1;
-
-//       if (user.penalty === 3) {
-//         user.status = "inactive";
-//       }
-
-//       await user.save();
-//     }
-
-//     appointment.attendees = attendees;
-//     appointment.title = title;
-//     appointment.location = location;
-//     appointment.timeStart = timeStart;
-//     appointment.timeEnd = timeEnd;
-//     appointment.status = status;
-//     appointment.professor = professor;
-//     appointment.reason = reason;
-//     appointment.key = key;
-
-//     appointment.history.push(historyLog);
-
-//     await appointment.save();
-
-//     res.status(200).json({
-//       success: true,
-//       appointment: appointment,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to update the appointment", 500));
-//   }
-// };
+    res.status(200).json({
+      success: true,
+      appointment: appointment,
+    });
+  } catch (error) {
+    next(new ErrorHandler("Failed to update the appointment", 500));
+  }
+};
 
 exports.updateAppointment = async (req, res, next) => {
   try {
@@ -645,37 +570,6 @@ exports.updateAppointment = async (req, res, next) => {
 
     await appointment.save();
 
-    // Retrieve user's email from the User model
-    const user = await User.findById(appointment.userId);
-    if (!user) {
-      return next(new ErrorHandler("User not found", 404));
-    }
-    const userEmail = user.email;
-
-    // Email notification
-    const emailOptions = {
-      email: userEmail,
-      subject: "Appointment Updated",
-      message:
-        `Your appointment has been successfully updated.\n\n` +
-        `Appointment Information:\n` +
-        `Title: ${title}\n` +
-        `Location: ${location}\n` +
-        `Time Start: ${formatDate(timeStart)}\n` +
-        `Time End: ${formatDate(timeEnd)}\n` +
-        `Status: ${userStatus}\n`, // Include user's status
-      html:
-        `<p>Your appointment has been successfully updated.</p>` +
-        `<p><strong>Appointment Information:</strong></p>` +
-        `<p><strong>Title:</strong> ${title}</p>` +
-        `<p><strong>Location:</strong> ${location}</p>` +
-        `<p><strong>Time Start:</strong> ${formatDate(timeStart)}</p>` +
-        `<p><strong>Time End:</strong> ${formatDate(timeEnd)}</p>` +
-        `<p><strong>Status:</strong> ${userStatus}</p>`, // Include user's status
-    };
-
-    await sendEmail(emailOptions); // Send email
-
     res.status(200).json({
       success: true,
       appointment: appointment,
@@ -684,6 +578,112 @@ exports.updateAppointment = async (req, res, next) => {
     next(new ErrorHandler("Failed to update the appointment", 500));
   }
 };
+
+// exports.updateAppointment = async (req, res, next) => {
+//   try {
+//     const {
+//       attendees,
+//       title,
+//       location,
+//       timeStart,
+//       timeEnd,
+//       status,
+//       professor,
+//       reason,
+//       key,
+//     } = req.body;
+
+//     const appointment = await Appointment.findById(req.params.id);
+
+//     if (!appointment) {
+//       return next(new ErrorHandler("Appointment not found", 404));
+//     }
+
+//     const historyLog = {
+//       schedTitle: appointment.title,
+//       requester: appointment.requester,
+//       description: appointment.description,
+//       location: appointment.location,
+//       timeStart: appointment.timeStart,
+//       timeEnd: appointment.timeEnd,
+//       professor: professor,
+//       status: status,
+//       by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
+//     };
+
+//     if (
+//       reason === "Reason 1" ||
+//       reason === "Reason 2" ||
+//       reason === "Reason 3"
+//     ) {
+//       const user = await User.findById(appointment.userId);
+
+//       if (!user) {
+//         return next(new ErrorHandler("User not found", 404));
+//       }
+
+//       user.penalty += 1;
+
+//       if (user.penalty === 3) {
+//         user.status = "inactive";
+//       }
+
+//       await user.save();
+//     }
+
+//     appointment.attendees = attendees;
+//     appointment.title = title;
+//     appointment.location = location;
+//     appointment.timeStart = timeStart;
+//     appointment.timeEnd = timeEnd;
+//     appointment.status = status;
+//     appointment.professor = professor;
+//     appointment.reason = reason;
+//     appointment.key = key;
+
+//     appointment.history.push(historyLog);
+
+//     await appointment.save();
+
+//     // Retrieve user's email from the User model
+//     const user = await User.findById(appointment.userId);
+//     if (!user) {
+//       return next(new ErrorHandler("User not found", 404));
+//     }
+//     const userEmail = user.email;
+
+//     // Email notification
+//     const emailOptions = {
+//       email: userEmail,
+//       subject: "Appointment Updated",
+//       message:
+//         `Your appointment has been successfully updated.\n\n` +
+//         `Appointment Information:\n` +
+//         `Title: ${title}\n` +
+//         `Location: ${location}\n` +
+//         `Time Start: ${formatDate(timeStart)}\n` +
+//         `Time End: ${formatDate(timeEnd)}\n` +
+//         `Status: ${userStatus}\n`, // Include user's status
+//       html:
+//         `<p>Your appointment has been successfully updated.</p>` +
+//         `<p><strong>Appointment Information:</strong></p>` +
+//         `<p><strong>Title:</strong> ${title}</p>` +
+//         `<p><strong>Location:</strong> ${location}</p>` +
+//         `<p><strong>Time Start:</strong> ${formatDate(timeStart)}</p>` +
+//         `<p><strong>Time End:</strong> ${formatDate(timeEnd)}</p>` +
+//         `<p><strong>Status:</strong> ${userStatus}</p>`, // Include user's status
+//     };
+
+//     await sendEmail(emailOptions); // Send email
+
+//     res.status(200).json({
+//       success: true,
+//       appointment: appointment,
+//     });
+//   } catch (error) {
+//     next(new ErrorHandler("Failed to update the appointment", 500));
+//   }
+// }; FIX UPDATE 
 
 // Helper function to format date
 const formatDate = (date) => {
