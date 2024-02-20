@@ -417,7 +417,6 @@ exports.updateOrder = async (req, res, next) => {
       return next(new ErrorHandler("Order not found", 404));
     }
 
-    // Create history record based on the current order details
     const historyRecord = {
       customer: order.customer,
       orderItems: order.orderItems,
@@ -437,10 +436,8 @@ exports.updateOrder = async (req, res, next) => {
       order.deliveredAt = Date.now();
     }
 
-    // Save the updated order
     await order.save();
 
-    // Add the history record to the order's history array
     order.history.push(historyRecord);
     await order.save();
 

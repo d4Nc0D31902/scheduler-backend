@@ -333,9 +333,7 @@ exports.updateEquipment = async (req, res, next) => {
     let equipment = await Equipment.findById(req.params.id);
 
     if (!equipment) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Equipment not found" });
+      return next(new ErrorHandler("Equipment not found", 404));
     }
 
     const oldEquipment = { ...equipment.toObject() };
@@ -366,16 +364,18 @@ exports.updateEquipment = async (req, res, next) => {
       req.body.images = imagesLinks;
     }
 
-    if (req.body.status) {
-      equipment.status = req.body.status;
-    }
+    equipment = await Equipment.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+      useFindandModify: false,
+    });
 
     const stockChange = parseInt(req.body.stock) - parseInt(oldEquipment.stock);
 
     if (stockChange > 0) {
       const newStockHistory = {
         name: oldEquipment.name,
-        quantity: Math.abs(stockChange),
+        quantity: stockChange,
         status: "Restocked",
         by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
       };
@@ -384,6 +384,7 @@ exports.updateEquipment = async (req, res, next) => {
     }
 
     equipment.stock = req.body.stock;
+    equipment.user = req.user._id;
 
     equipment = await equipment.save();
 
