@@ -441,11 +441,11 @@ exports.updateOrder = async (req, res, next) => {
     order.history.push(historyRecord);
     await order.save();
 
-    // Fetch user's email from the User model
     const user = await User.findById(order.user);
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
     }
+    
     const userEmail = user.email;
 
     // Construct email notification for order update

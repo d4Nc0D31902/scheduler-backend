@@ -4,76 +4,81 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Please enter your name"],
-    maxLength: [30, "Your name cannot exceed 30 characters"],
-  },
-  department: {
-    type: String,
-    // required: true,
-  },
-  course: {
-    type: String,
-    // required: true,
-  },
-  year: {
-    type: String,
-    // required: true,
-  },
-  email: {
-    type: String,
-    required: [true, "Please enter your email"],
-    unique: true,
-    validate: [validator.isEmail, "Please enter valid email address"],
-  },
-  password: {
-    type: String,
-    required: [true, "Please enter your password"],
-    minlength: [6, "Your password must be longer than 6 characters"],
-    select: false,
-  },
-  avatar: {
-    public_id: {
+const userSchema = new mongoose.Schema(
+  {
+    name: {
       type: String,
-      required: true,
+      required: [true, "Please enter your name"],
+      maxLength: [30, "Your name cannot exceed 30 characters"],
     },
-    url: {
+    department: {
       type: String,
-      required: true,
+      // required: true,
     },
-  },
-  role: {
-    type: String,
-    default: "user",
-  },
-  penalty: {
-    type: Number,
-    default: 0,
-    validate: {
-      validator: function (value) {
-        return value >= 0 && value <= 3;
+    course: {
+      type: String,
+      // required: true,
+    },
+    year: {
+      type: String,
+      // required: true,
+    },
+    email: {
+      type: String,
+      required: [true, "Please enter your email"],
+      unique: true,
+      validate: [validator.isEmail, "Please enter valid email address"],
+    },
+    password: {
+      type: String,
+      required: [true, "Please enter your password"],
+      minlength: [6, "Your password must be longer than 6 characters"],
+      select: false,
+    },
+    avatar: {
+      public_id: {
+        type: String,
+        required: true,
       },
-      message: "Penalty must be between 0 and 3",
+      url: {
+        type: String,
+        required: true,
+      },
     },
+    role: {
+      type: String,
+      default: "user",
+    },
+    penalty: {
+      type: Number,
+      default: 0,
+      validate: {
+        validator: function (value) {
+          return value >= 0 && value <= 3;
+        },
+        message: "Penalty must be between 0 and 3",
+      },
+    },
+    availability: {
+      type: String,
+      default: "available",
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
   },
-  availability: {
-    type: String,
-    default: "available",
-  },
-  status: {
-    type: String,
-    enum: ["active", "inactive"],
-    default: "active",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  resetPasswordToken: String,
-  resetPasswordExpire: Date,
-});
+  {
+    timestamps: true,
+  }
+);
 
 // uncomment to test bcrypt
 userSchema.pre("save", async function (next) {
