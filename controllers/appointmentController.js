@@ -3,170 +3,11 @@ const ErrorHandler = require("../utils/errorHandler");
 const User = require("../models/user");
 const mongoose = require("mongoose");
 const sendEmail = require("../utils/sendEmail");
+const cloudinary = require("cloudinary");
 
 // @desc    Create a new appointment
 // @route   POST /api/appointments
 // @access  Private (You can define your own authentication middleware)
-// exports.createAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       location,
-//       title,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       reason,
-//       key,
-//     } = req.body;
-
-//     const status = "Pending";
-
-//     const newAppointment = await Appointment.create({
-//       userId: req.user._id,
-//       requester: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
-//       attendees,
-//       location,
-//       title,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       status,
-//       reason,
-//       key,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       newAppointment,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     next(new ErrorHandler("Appointment creation failed", 500));
-//   }
-// };
-
-// exports.createAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       location,
-//       title,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       reason,
-//       professor, // Include professor here
-//       key,
-//     } = req.body;
-
-//     const status = "Pending";
-
-//     const newAppointment = await Appointment.create({
-//       userId: req.user._id,
-//       requester: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
-//       attendees,
-//       location,
-//       title,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       professor,
-//       status,
-//       reason,
-//       key,
-//     });
-
-//     const historyLog = {
-//       schedTitle: title,
-//       requester: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
-//       location,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       professor,
-//       status,
-//       by: "N/A",
-//     };
-
-//     newAppointment.history.push(historyLog);
-
-//     await newAppointment.save();
-
-//     res.status(201).json({
-//       success: true,
-//       newAppointment,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     next(new ErrorHandler("Appointment creation failed", 500));
-//   }
-// };
-
-// exports.createAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       location,
-//       title,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       reason,
-//       professor, // Include professor here
-//       status,
-//       key,
-//     } = req.body;
-
-//     // const status = "Pending";
-//     let requester = "";
-
-//     if (req.user.role === "professor") {
-//       requester = `${req.user.name} - ${req.user.department}`;
-//     } else {
-//       requester = `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`;
-//     }
-
-//     const newAppointment = await Appointment.create({
-//       userId: req.user._id,
-//       requester,
-//       attendees,
-//       location,
-//       title,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       professor,
-//       status,
-//       reason,
-//       key,
-//     });
-
-//     const historyLog = {
-//       schedTitle: title,
-//       requester,
-//       location,
-//       description,
-//       timeStart,
-//       timeEnd,
-//       professor,
-//       status,
-//       by: "N/A",
-//     };
-
-//     newAppointment.history.push(historyLog);
-
-//     await newAppointment.save();
-
-//     res.status(201).json({
-//       success: true,
-//       newAppointment,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     next(new ErrorHandler("Appointment creation failed", 500));
-//   }
-// };
 
 exports.createAppointment = async (req, res, next) => {
   try {
@@ -181,9 +22,9 @@ exports.createAppointment = async (req, res, next) => {
       professor,
       status,
       key,
+      screenShot, // Add screenShot to the destructured request body
     } = req.body;
 
-    // const status = "Pending";
     let requester = "";
 
     if (req.user.role === "professor") {
@@ -192,6 +33,22 @@ exports.createAppointment = async (req, res, next) => {
       requester = `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`;
     }
 
+    // Saving screenshots to Cloudinary
+    let screenShotLinks = [];
+    if (screenShot && screenShot.length > 0) {
+      for (let i = 0; i < screenShot.length; i++) {
+        const result = await cloudinary.uploader.upload(screenShot[i], {
+          folder: "appointments", // Change the folder name if necessary
+        });
+
+        screenShotLinks.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      }
+    }
+
+    // Creating the appointment with the screenshot links
     const newAppointment = await Appointment.create({
       userId: req.user._id,
       requester,
@@ -205,6 +62,7 @@ exports.createAppointment = async (req, res, next) => {
       status,
       reason,
       key,
+      screenShot: screenShotLinks, // Add the screenShot links to the appointment
     });
 
     const historyLog = {
@@ -223,27 +81,10 @@ exports.createAppointment = async (req, res, next) => {
 
     await newAppointment.save();
 
-    // Send email notification
-    // const emailOptions = {
-    //   email: req.user.email, // Assuming req.user.email is the user's email
-    //   subject: "Appointment Created",
-    //   message: "Your appointment has been successfully created.",
-    //   html: "<p>Your appointment has been successfully created.</p>",
-    // };
-    const options = {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    };
-
-    const formattedTimeStart = timeStart.toLocaleString("en-US", options);
-    const formattedTimeEnd = timeEnd.toLocaleString("en-US", options);
-
+    // Construct email notification for the appointment
+    // Include screenshot links in the email if necessary
     const emailOptions = {
-      email: req.user.email, // Assuming req.user.email is the user's email
+      email: req.user.email,
       subject: "Appointment Created",
       message: `Your appointment has been successfully created.
         Appointment Details:
@@ -273,6 +114,7 @@ exports.createAppointment = async (req, res, next) => {
       `,
     };
 
+    // Send email notification
     await sendEmail(emailOptions);
 
     res.status(201).json({
@@ -339,100 +181,6 @@ exports.getSingleAppointment = async (req, res, next) => {
 // @route   PUT /api/appointments/:id
 // @access  Private (You can define your own authentication middleware)
 
-// exports.updateAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       title,
-//       location,
-//       timeStart,
-//       timeEnd,
-//       status,
-//       reason,
-//       key,
-//     } = req.body;
-//     const appointment = await Appointment.findById(req.params.id);
-
-//     if (!appointment) {
-//       return next(new ErrorHandler("Appointment not found", 404));
-//     }
-
-//     // Update appointment properties
-//     appointment.attendees = attendees;
-//     appointment.title = title;
-//     appointment.location = location;
-//     appointment.timeStart = timeStart;
-//     appointment.timeEnd = timeEnd;
-//     appointment.status = status;
-//     appointment.reason = reason;
-//     appointment.key = key;
-
-//     const updatedAppointment = await appointment.save();
-
-//     res.status(200).json({
-//       success: true,
-//       appointment: updatedAppointment,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to update the appointment", 500));
-//   }
-// };
-
-// exports.updateAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       title,
-//       location,
-//       timeStart,
-//       timeEnd,
-//       status,
-//       professor,
-//       reason,
-//       key,
-//     } = req.body;
-
-//     const appointment = await Appointment.findById(req.params.id);
-
-//     if (!appointment) {
-//       return next(new ErrorHandler("Appointment not found", 404));
-//     }
-
-//     const historyLog = {
-//       schedTitle: appointment.title,
-//       requester: appointment.requester,
-//       description: appointment.description,
-//       location: appointment.location,
-//       timeStart: appointment.timeStart,
-//       timeEnd: appointment.timeEnd,
-//       professor: professor,
-//       status: status,
-//       by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
-//     };
-
-//     appointment.attendees = attendees;
-//     appointment.title = title;
-//     appointment.location = location;
-//     appointment.timeStart = timeStart;
-//     appointment.timeEnd = timeEnd;
-//     appointment.status = status;
-//     appointment.professor = professor;
-//     appointment.reason = reason;
-//     appointment.key = key;
-
-//     appointment.history.push(historyLog);
-
-//     const updatedAppointment = await appointment.save();
-
-//     res.status(200).json({
-//       success: true,
-//       appointment: updatedAppointment,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to update the appointment", 500));
-//   }
-// };
-
 exports.updateAppointment = async (req, res, next) => {
   try {
     const {
@@ -495,80 +243,22 @@ exports.updateAppointment = async (req, res, next) => {
 
     await appointment.save();
 
-    res.status(200).json({
-      success: true,
-      appointment: appointment,
-    });
-  } catch (error) {
-    next(new ErrorHandler("Failed to update the appointment", 500));
-  }
-};
-
-exports.updateAppointment = async (req, res, next) => {
-  try {
-    const {
-      attendees,
-      title,
-      location,
-      timeStart,
-      timeEnd,
-      status,
-      professor,
-      reason,
-      key,
-    } = req.body;
-
-    const appointment = await Appointment.findById(req.params.id);
-
-    if (!appointment) {
-      return next(new ErrorHandler("Appointment not found", 404));
+    // Fetch user's email from the User model using appointment.userId
+    const user = await User.findById(appointment.userId);
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
     }
 
-    const historyLog = {
-      schedTitle: appointment.title,
-      requester: appointment.requester,
-      description: appointment.description,
-      location: appointment.location,
-      timeStart: appointment.timeStart,
-      timeEnd: appointment.timeEnd,
-      professor: professor,
-      status: status,
-      by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
+    // Construct email notification for appointment update
+    const emailOptions = {
+      email: user.email,
+      subject: "Appointment Update",
+      message: `Your appointment has been updated.`,
+      html: `<p>Your appointment has been updated.</p>`,
     };
 
-    if (
-      reason === "Reason 1" ||
-      reason === "Reason 2" ||
-      reason === "Reason 3"
-    ) {
-      const user = await User.findById(appointment.userId);
-
-      if (!user) {
-        return next(new ErrorHandler("User not found", 404));
-      }
-
-      user.penalty += 1;
-
-      if (user.penalty === 3) {
-        user.status = "inactive";
-      }
-
-      await user.save();
-    }
-
-    appointment.attendees = attendees;
-    appointment.title = title;
-    appointment.location = location;
-    appointment.timeStart = timeStart;
-    appointment.timeEnd = timeEnd;
-    appointment.status = status;
-    appointment.professor = professor;
-    appointment.reason = reason;
-    appointment.key = key;
-
-    appointment.history.push(historyLog);
-
-    await appointment.save();
+    // Send email notification
+    await sendEmail(emailOptions);
 
     res.status(200).json({
       success: true,
@@ -578,112 +268,6 @@ exports.updateAppointment = async (req, res, next) => {
     next(new ErrorHandler("Failed to update the appointment", 500));
   }
 };
-
-// exports.updateAppointment = async (req, res, next) => {
-//   try {
-//     const {
-//       attendees,
-//       title,
-//       location,
-//       timeStart,
-//       timeEnd,
-//       status,
-//       professor,
-//       reason,
-//       key,
-//     } = req.body;
-
-//     const appointment = await Appointment.findById(req.params.id);
-
-//     if (!appointment) {
-//       return next(new ErrorHandler("Appointment not found", 404));
-//     }
-
-//     const historyLog = {
-//       schedTitle: appointment.title,
-//       requester: appointment.requester,
-//       description: appointment.description,
-//       location: appointment.location,
-//       timeStart: appointment.timeStart,
-//       timeEnd: appointment.timeEnd,
-//       professor: professor,
-//       status: status,
-//       by: `${req.user.name} - ${req.user.department}, ${req.user.course}, ${req.user.year}`,
-//     };
-
-//     if (
-//       reason === "Reason 1" ||
-//       reason === "Reason 2" ||
-//       reason === "Reason 3"
-//     ) {
-//       const user = await User.findById(appointment.userId);
-
-//       if (!user) {
-//         return next(new ErrorHandler("User not found", 404));
-//       }
-
-//       user.penalty += 1;
-
-//       if (user.penalty === 3) {
-//         user.status = "inactive";
-//       }
-
-//       await user.save();
-//     }
-
-//     appointment.attendees = attendees;
-//     appointment.title = title;
-//     appointment.location = location;
-//     appointment.timeStart = timeStart;
-//     appointment.timeEnd = timeEnd;
-//     appointment.status = status;
-//     appointment.professor = professor;
-//     appointment.reason = reason;
-//     appointment.key = key;
-
-//     appointment.history.push(historyLog);
-
-//     await appointment.save();
-
-//     // Retrieve user's email from the User model
-//     const user = await User.findById(appointment.userId);
-//     if (!user) {
-//       return next(new ErrorHandler("User not found", 404));
-//     }
-//     const userEmail = user.email;
-
-//     // Email notification
-//     const emailOptions = {
-//       email: userEmail,
-//       subject: "Appointment Updated",
-//       message:
-//         `Your appointment has been successfully updated.\n\n` +
-//         `Appointment Information:\n` +
-//         `Title: ${title}\n` +
-//         `Location: ${location}\n` +
-//         `Time Start: ${formatDate(timeStart)}\n` +
-//         `Time End: ${formatDate(timeEnd)}\n` +
-//         `Status: ${userStatus}\n`, // Include user's status
-//       html:
-//         `<p>Your appointment has been successfully updated.</p>` +
-//         `<p><strong>Appointment Information:</strong></p>` +
-//         `<p><strong>Title:</strong> ${title}</p>` +
-//         `<p><strong>Location:</strong> ${location}</p>` +
-//         `<p><strong>Time Start:</strong> ${formatDate(timeStart)}</p>` +
-//         `<p><strong>Time End:</strong> ${formatDate(timeEnd)}</p>` +
-//         `<p><strong>Status:</strong> ${userStatus}</p>`, // Include user's status
-//     };
-
-//     await sendEmail(emailOptions); // Send email
-
-//     res.status(200).json({
-//       success: true,
-//       appointment: appointment,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to update the appointment", 500));
-//   }
-// }; FIX UPDATE 
 
 // Helper function to format date
 const formatDate = (date) => {

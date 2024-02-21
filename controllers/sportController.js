@@ -5,25 +5,6 @@ const ErrorHandler = require("../utils/errorHandler");
 // @route   POST /api/sports
 // @access  Private (You can define your own authentication middleware)
 
-// exports.createSport = async (req, res, next) => {
-//   try {
-//     const { name } = req.body;
-
-//     // Create a new instance of the Sport model
-//     const newSport = await Sport.create({
-//       name,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       newSport,
-//     });
-//   } catch (error) {
-//     console.error(error); // Log the error
-//     next(new ErrorHandler("Sport creation failed", 500));
-//   }
-// };
-
 exports.createSport = async (req, res, next) => {
   try {
     const { name } = req.body;
@@ -90,29 +71,6 @@ exports.getSportById = async (req, res, next) => {
 // @desc    Update a sport by ID
 // @route   PUT /api/sports/:id
 // @access  Private (You can define your own authentication middleware)
-
-// exports.updateSport = async (req, res, next) => {
-//   try {
-//     const { name } = req.body;
-//     const sport = await Sport.findById(req.params.id);
-
-//     if (!sport) {
-//       return next(new ErrorHandler("Sport not found", 404));
-//     }
-
-//     // Update sport properties
-//     sport.name = name;
-
-//     const updatedSport = await sport.save();
-
-//     res.status(200).json({
-//       success: true,
-//       sport: updatedSport,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to update the sport", 500));
-//   }
-// };
 
 exports.updateSport = async (req, res, next) => {
   try {

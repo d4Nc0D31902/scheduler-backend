@@ -5,25 +5,6 @@ const ErrorHandler = require("../utils/errorHandler");
 // @route   POST /api/locations
 // @access  Private (You can define your own authentication middleware)
 
-// exports.createLocation = async (req, res, next) => {
-//   try {
-//     const { name } = req.body;
-
-//     // Create a new instance of the Location model
-//     const newLocation = await Location.create({
-//       name,
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       newLocation,
-//     });
-//   } catch (error) {
-//     console.error(error); // Log the error
-//     next(new ErrorHandler("Location creation failed", 500));
-//   }
-// };
-
 exports.createLocation = async (req, res, next) => {
   try {
     const { name } = req.body;
@@ -91,29 +72,6 @@ exports.getLocationById = async (req, res, next) => {
 // @desc    Update a location by ID
 // @route   PUT /api/locations/:id
 // @access  Private (You can define your own authentication middleware)
-
-// exports.updateLocation = async (req, res, next) => {
-//   try {
-//     const { name } = req.body;
-//     const location = await Location.findById(req.params.id);
-
-//     if (!location) {
-//       return next(new ErrorHandler("Location not found", 404));
-//     }
-
-//     // Update location properties
-//     location.name = name;
-
-//     const updatedLocation = await location.save();
-
-//     res.status(200).json({
-//       success: true,
-//       location: updatedLocation,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to update the location", 500));
-//   }
-// };
 
 exports.updateLocation = async (req, res, next) => {
   try {

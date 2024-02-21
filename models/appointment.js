@@ -98,6 +98,12 @@ const appointmentSchema = mongoose.Schema(
       maxlength: [6],
       default: " ",
     },
+    screenShot: [
+      {
+        public_id: String,
+        url: String,
+      },
+    ],
     history: [historySchema],
   },
   {
