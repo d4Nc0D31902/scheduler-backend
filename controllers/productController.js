@@ -265,37 +265,36 @@ exports.getAdminProducts = async (req, res, next) => {
 };
 
 exports.deleteReview = async (req, res, next) => {
-  const product = await Product.findById(req.query.productId);
+  try {
+    const product = await Product.findOneAndUpdate(
+      { "reviews._id": req.query.id }, // Find the product containing the review
+      { $pull: { reviews: { _id: req.query.id } } }, // Pull the review from the product's reviews array
+      { new: true } // Return the updated document
+    );
 
-  console.log(req);
-
-  const reviews = product.reviews.filter(
-    (review) => review._id.toString() !== req.query.id.toString()
-  );
-
-  const numOfReviews = reviews.length;
-
-  const ratings =
-    product.reviews.reduce((acc, item) => item.rating + acc, 0) /
-    reviews.length;
-
-  await Product.findByIdAndUpdate(
-    req.query.productId,
-    {
-      reviews,
-      ratings,
-      numOfReviews,
-    },
-    {
-      new: true,
-      runValidators: true,
-      useFindAndModify: false,
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
-  );
 
-  res.status(200).json({
-    success: true,
-  });
+    // Calculate new ratings and numOfReviews
+    const numOfReviews = product.reviews.length;
+    const ratings =
+      product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+      numOfReviews;
+
+    // Update the product with new ratings and numOfReviews
+    await Product.findByIdAndUpdate(
+      product._id,
+      { ratings, numOfReviews },
+      { new: true, runValidators: true, useFindAndModify: false }
+    );
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
 };
 
 exports.productSales = async (req, res, next) => {
