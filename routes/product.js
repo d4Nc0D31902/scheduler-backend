@@ -10,6 +10,7 @@ const {
   deleteProduct,
   createProductReview,
   getProductReviews,
+  getAllProductReviews,
   getAdminProducts,
   deleteReview,
   productSales,
@@ -46,7 +47,8 @@ router
     deleteProduct
   );
 router.put("/review", isAuthenticatedUser, createProductReview);
-router.get("/reviews", isAuthenticatedUser, getProductReviews);
+// router.get("/reviews", isAuthenticatedUser, getProductReviews);
+router.get("/reviews", isAuthenticatedUser, getAllProductReviews);
 router.get(
   "/admin/products",
   isAuthenticatedUser,

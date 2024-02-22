@@ -231,6 +231,31 @@ exports.getProductReviews = async (req, res, next) => {
   });
 };
 
+exports.getAllProductReviews = async (req, res, next) => {
+  try {
+    const allProducts = await Product.find({});
+    let allReviews = [];
+    for (const product of allProducts) {
+      const populatedReviews = await Product.populate(product, {
+        path: "reviews.user",
+        select: "name",
+      });
+      allReviews = allReviews.concat(
+        populatedReviews.reviews.map((review) => ({
+          ...review.toObject(),
+          product: product.name,
+        }))
+      );
+    }
+    res.status(200).json({
+      success: true,
+      reviews: allReviews,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
 exports.getAdminProducts = async (req, res, next) => {
   const products = await Product.find();
   res.status(200).json({
