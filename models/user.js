@@ -38,11 +38,12 @@ const userSchema = new mongoose.Schema(
     avatar: {
       public_id: {
         type: String,
-        // required: true,
+        default: "avatars/sycaqurx0d18itwbtqcs", // provide a default value for public_id
       },
       url: {
         type: String,
-        // required: true,
+        default:
+          "https://res.cloudinary.com/dxee38clj/image/upload/v1708606343/avatars/sycaqurx0d18itwbtqcs.png", // provide a default value for url
       },
     },
     role: {
