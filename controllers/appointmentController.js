@@ -85,11 +85,10 @@ exports.createAppointment = async (req, res, next) => {
     // Include screenshot links in the email if necessary
     const emailOptions = {
       email: req.user.email,
-      subject: "Appointment Created",
-      message: `Your appointment has been successfully created.
-        Appointment Details:
+      subject: "Schedule Request",
+      message: `Your Schedule has been Successfully Requested.
+        Schedule Details:
         Title: ${title}
-        Requester: ${requester}
         Location: ${location}
         Description: ${description}
         Time Start: ${timeStart}
@@ -98,19 +97,78 @@ exports.createAppointment = async (req, res, next) => {
         Status: ${status}
         Reason: ${reason}
       `,
-      html: `<p>Your appointment has been successfully created.</p>
-        <p>Appointment Details:</p>
-        <ul>
-          <li>Title: ${title}</li>
-          <li>Requester: ${requester}</li>
-          <li>Location: ${location}</li>
-          <li>Description: ${description}</li>
-          <li>Time Start: ${timeStart}</li>
-          <li>Time End: ${timeEnd}</li>
-          <li>Professor: ${professor}</li>
-          <li>Status: ${status}</li>
-          <li>Reason: ${reason}</li>
-        </ul>
+      html: `
+      <div class="wrap" style="max-width: 600px; margin: 0 auto;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff"
+          style="border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <tr>
+              <td style="padding: 20px;">
+                  <div style="border-bottom: 2px solid #800000; padding-bottom: 20px;">
+                      <div style="font-family: sans-serif; font-size: 16px; margin-bottom: 10px;">Technological University
+                          of the Philippines - Taguig City</div>
+                      <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Premier State University</div>
+                      <div style="font-size: 12px; color: #666; margin-bottom: 10px;">14 East Service Road, South Super
+                          Highway, Taguig, Metro Manila</div>
+                  </div>
+                  <div style="margin-top: 20px;">
+                      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c8/Technological_University_of_the_Philippines_Seal.svg/1200px-Technological_University_of_the_Philippines_Seal.svg.png"
+                          alt="Logo" style="width: 100px; height: 100px; margin-right: 20px; float: left;">
+                      <div style="font-size: 14px; color: #800000; margin-bottom: 10px;">Order Confirmation</div>
+                      <p style="margin-bottom: 10px;">Your Schedule has been Successfully Requested.</p>
+                  </div>
+              </td>
+          </tr>
+      </table>
+      <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <h2 style="color: #800000; margin-bottom: 20px;">Your Schedule has been Successfully Requested!</h2>
+  
+          <hr style="border: 1px solid #ccc; margin: 20px 0;">
+  
+          <table style="width: 100%; border-collapse: collapse;">
+              <th style="  padding: 8px;">SCHEDULE INFORMATION</th>
+              <tr>
+                  <th style="border: 1px solid #ccc; padding: 8px;"></th>
+                  <th style="border: 1px solid #ccc; padding: 8px;">Details</th>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Title:</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${title}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Description</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${description}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Location</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${location}</td>
+              </tr>              
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Date & Time Start</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${timeStart}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Date & Time End</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${timeEnd}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Faculty</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${professor}</td>
+              </tr>
+
+
+              <th style="  padding: 8px;">STATUS REPORTS</th>
+              <tr>
+                  <th style="border: 1px solid #ccc; padding: 8px;">Status</th>
+                  <th style="border: 1px solid #ccc; padding: 8px;">Reason</th>
+              </tr>
+              <tr>
+                  <th style="border: 1px solid #ccc; padding: 8px;"> ${status}</th>
+                  <th style="border: 1px solid #ccc; padding: 8px;">${reason}</th>
+              </tr>
+  
+          </table>
+      </div>
+  </div>
       `,
     };
 
@@ -249,12 +307,132 @@ exports.updateAppointment = async (req, res, next) => {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    // Construct email notification for appointment update
+    // const emailOptions = {
+    //   email: user.email,
+    //   subject: "Appointment Update",
+    //   message: `Your appointment has been updated. Details:
+    //     Title: ${title}
+    //     Location: ${location}
+    //     Time Start: ${timeStart}
+    //     Time End: ${timeEnd}
+    //     Status: ${status}
+    //     Professor: ${professor}
+    //     Reason: ${reason}
+    //     Key: ${key}`,
+    //   html: `<p>Your appointment has been updated. Details:</p>
+    //     <ul>
+    //       <li><strong>Title:</strong> ${title}</li>
+    //       <li><strong>Location:</strong> ${location}</li>
+    //       <li><strong>Time Start:</strong> ${timeStart}</li>
+    //       <li><strong>Time End:</strong> ${timeEnd}</li>
+    //       <li><strong>Status:</strong> ${status}</li>
+    //       <li><strong>Professor:</strong> ${professor}</li>
+    //       <li><strong>Reason:</strong> ${reason}</li>
+    //       <li><strong>Key:</strong> ${key}</li>
+    //     </ul>`,
+    // };
+
     const emailOptions = {
       email: user.email,
       subject: "Appointment Update",
-      message: `Your appointment has been updated.`,
-      html: `<p>Your appointment has been updated.</p>`,
+      message: `Your appointment has been updated. Details: 
+        Title: ${title}
+        Location: ${location}
+        Attendees: ${attendees}
+        Time Start: ${timeStart}
+        Time End: ${timeEnd}
+        Status: ${status}
+        Professor: ${professor}
+        Reason: ${reason}
+        Key: ${key}`,
+      // html: `<p style="font-weight: bold;">Your appointment has been updated. Details:</p>
+      //   <ul style="list-style-type: none; padding: 0;">
+      //     <li><strong>Title:</strong> ${title}</li>
+      //     <li><strong>Location:</strong> ${location}</li>
+      //     <li><strong>Time Start:</strong> ${timeStart}</li>
+      //     <li><strong>Time End:</strong> ${timeEnd}</li>
+      //     <li><strong>Status:</strong> ${status}</li>
+      //     <li><strong>Professor:</strong> ${professor}</li>
+      //     <li><strong>Reason:</strong> ${reason}</li>
+      //     <li><strong>Key:</strong> ${key}</li>
+      //   </ul>`,
+      html: `
+      <div class="wrap" style="max-width: 600px; margin: 0 auto;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff"
+          style="border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <tr>
+              <td style="padding: 20px;">
+                  <div style="border-bottom: 2px solid #800000; padding-bottom: 20px;">
+                      <div style="font-family: sans-serif; font-size: 16px; margin-bottom: 10px;">Technological University
+                          of the Philippines - Taguig City</div>
+                      <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Premier State University</div>
+                      <div style="font-size: 12px; color: #666; margin-bottom: 10px;">14 East Service Road, South Super
+                          Highway, Taguig, Metro Manila</div>
+                  </div>
+                  <div style="margin-top: 20px;">
+                      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c8/Technological_University_of_the_Philippines_Seal.svg/1200px-Technological_University_of_the_Philippines_Seal.svg.png"
+                          alt="Logo" style="width: 100px; height: 100px; margin-right: 20px; float: left;">
+                      <div style="font-size: 14px; color: #800000; margin-bottom: 10px;">Order Confirmation</div>
+                      <p style="margin-bottom: 10px;">Your Schedule has been Successfully Requested.</p>
+                  </div>
+              </td>
+          </tr>
+      </table>
+      <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <h2 style="color: #800000; margin-bottom: 20px;">Your Schedule has been Successfully Requested!</h2>
+  
+          <hr style="border: 1px solid #ccc; margin: 20px 0;">
+  
+          <table style="width: 100%; border-collapse: collapse;">
+              <th style="  padding: 8px;">SCHEDULE INFORMATION</th>
+              <tr>
+                  <th style="border: 1px solid #ccc; padding: 8px;"></th>
+                  <th style="border: 1px solid #ccc; padding: 8px;">Details</th>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Title:</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${title}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Attendees</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${attendees}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Location</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${location}</td>
+              </tr>              
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Date & Time Start</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${timeStart}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Date & Time End</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${timeEnd}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Faculty</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${professor}</td>
+              </tr>
+              <tr>
+                  <td style="border: 1px solid #ccc; padding: 8px;">Key</td>
+                  <td style="border: 1px solid #ccc; padding: 8px;">${key}</td>
+             </tr>
+
+
+              <th style="  padding: 8px;">STATUS REPORTS</th>
+              <tr>
+                  <th style="border: 1px solid #ccc; padding: 8px;">Status</th>
+                  <th style="border: 1px solid #ccc; padding: 8px;">Reason</th>
+              </tr>
+              <tr>
+                  <th style="border: 1px solid #ccc; padding: 8px;"> ${status}</th>
+                  <th style="border: 1px solid #ccc; padding: 8px;">${reason}</th>
+              </tr>
+  
+          </table>
+      </div>
+  </div>
+      `,
     };
 
     // Send email notification

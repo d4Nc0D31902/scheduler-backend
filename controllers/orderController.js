@@ -84,17 +84,49 @@ exports.newOrder = async (req, res, next) => {
         `Shipping Info: ${JSON.stringify(shippingInfo)}\n` +
         `Total Price: ${totalPrice}\n` +
         `Payment Method: ${paymentMeth}\n`,
-      html:
-        `<p>Your order with reference number ${reference_num} has been successfully placed.</p>` +
-        `<p><strong>Order Details:</strong></p>` +
-        `<p><strong>Items:</strong><br>${orderItems
-          .map((item) => `${item.name} - ${item.quantity}`)
-          .join("<br>")}</p>` +
-        `<p><strong>Shipping Info:</strong><br>${JSON.stringify(
-          shippingInfo
-        )}</p>` +
-        `<p><strong>Total Price:</strong> ${totalPrice}</p>` +
-        `<p><strong>Payment Method:</strong> ${paymentMeth}</p>`,
+      html: `<div class="wrap" style="max-width: 600px; margin: 0 auto;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <tr>
+            <td style="padding: 20px;">
+              <div style="border-bottom: 2px solid #800000; padding-bottom: 20px;">
+                <div style="font-family: sans-serif; font-size: 16px; margin-bottom: 10px;">Technological University of the Philippines - Taguig City</div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Premier State University</div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">14 East Service Road, South Super Highway, Taguig, Metro Manila</div>
+              </div>
+              <div style="margin-top: 20px;">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c8/Technological_University_of_the_Philippines_Seal.svg/1200px-Technological_University_of_the_Philippines_Seal.svg.png" alt="Logo" style="width: 100px; height: 100px; margin-right: 20px; float: left;">
+                <div style="font-size: 14px; color: #800000; margin-bottom: 10px;">Order Confirmation</div>
+              </div>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td colspan="2" style="text-align: center; padding: 8px; border: 1px solid #ccc;"><strong>Order Details</strong></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #ccc;"><strong>Items</strong></td>
+                  <td style="padding: 8px; border: 1px solid #ccc;"><strong>Quantity</strong></td>
+                </tr>
+                ${orderItems
+                  .map(
+                    (item) => `
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #ccc;">${item.name}</td>
+                  <td style="padding: 8px; border: 1px solid #ccc;">${item.quantity}</td>
+                </tr>`
+                  )
+                  .join("")}
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #ccc;"><strong>Total Price</strong></td>
+                  <td style="padding: 8px; border: 1px solid #ccc;">${totalPrice}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #ccc;"><strong>Payment Method</strong></td>
+                  <td style="padding: 8px; border: 1px solid #ccc;">${paymentMeth}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>`,
     };
 
     // Send email notification
@@ -186,7 +218,7 @@ exports.updateOrder = async (req, res, next) => {
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
     }
-    
+
     const userEmail = user.email;
 
     // Construct email notification for order update
@@ -194,7 +226,64 @@ exports.updateOrder = async (req, res, next) => {
       email: userEmail,
       subject: "Order Update",
       message: `Your order with reference number ${order.reference_num} has been updated to ${req.body.status}.`,
-      html: `<p>Your order with reference number ${order.reference_num} has been updated to ${req.body.status}.</p>`,
+      html: `
+      <div class="wrap" style="max-width: 600px; margin: 0 auto;">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+              <tr>
+                  <td style="padding: 20px;">
+                      <div style="border-bottom: 2px solid #800000; padding-bottom: 20px;">
+                          <div style="font-family: sans-serif; font-size: 16px; margin-bottom: 10px;">Technological University of the Philippines - Taguig City</div>
+                          <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Premier State University</div>
+                          <div style="font-size: 12px; color: #666; margin-bottom: 10px;">14 East Service Road, South Super Highway, Taguig, Metro Manila</div>
+                      </div>
+                      <div style="margin-top: 20px;">
+                          <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c8/Technological_University_of_the_Philippines_Seal.svg/1200px-Technological_University_of_the_Philippines_Seal.svg.png" alt="Logo" style="width: 100px; height: 100px; margin-right: 20px; float: left;">
+                          <div style="font-size: 14px; color: #800000; margin-bottom: 10px;">Order Confirmation</div>
+                      </div>
+                      <table style="width: 100%; border-collapse: collapse;">
+                          <tr>
+                              <td colspan="2" style="text-align: center; padding: 8px; border: 1px solid #ccc;"><strong>Order Details</strong></td>
+                          </tr>
+                          <tr>
+                              <td style="padding: 8px; border: 1px solid #ccc;"><strong>Items</strong></td>
+                              <td style="padding: 8px; border: 1px solid #ccc;"><strong>Quantity</strong></td>
+                          </tr>
+                          ${order.orderItems
+                            .map(
+                              (item) => `
+                          <tr>
+                              <td style="padding: 8px; border: 1px solid #ccc;">${item.name}</td>
+                              <td style="padding: 8px; border: 1px solid #ccc;">${item.quantity}</td>
+                          </tr>`
+                            )
+                            .join("")}
+                          <tr>
+                              <td style="padding: 8px; border: 1px solid #ccc;"><strong>Total Price</strong></td>
+                              <td style="padding: 8px; border: 1px solid #ccc;">${
+                                order.totalPrice
+                              }</td>
+                          </tr>
+                          <tr>
+                              <td style="padding: 8px; border: 1px solid #ccc;"><strong>Payment Method</strong></td>
+                              <td style="padding: 8px; border: 1px solid #ccc;">${
+                                order.paymentMeth
+                              }</td>
+                          </tr>
+                          ${
+                            order.paymentMeth === "GCash"
+                              ? `
+                          <tr>
+                              <td style="padding: 8px; border: 1px solid #ccc;"><strong>Reference Number</strong></td>
+                              <td style="padding: 8px; border: 1px solid #ccc;">${order.reference_num}</td>
+                          </tr>`
+                              : ""
+                          }
+                      </table>
+                  </td>
+              </tr>
+          </table>
+      </div>
+      `,
     };
 
     // Send email notification
