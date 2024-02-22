@@ -5,32 +5,65 @@ const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
 const cloudinary = require("cloudinary").v2;
 
+// exports.registerUser = async (req, res, next) => {
+//   const result = await cloudinary.uploader.upload(
+//     req.body.avatar,
+//     {
+//       folder: "avatars",
+//       width: 150,
+//       crop: "scale",
+//     },
+//     (err, res) => {
+//       console.log(err, res);
+//     }
+//   );
+//   const { name, department, course, year, email, password } = req.body;
+//   const user = await User.create({
+//     name,
+//     email,
+//     password,
+//     department,
+//     course,
+//     year,
+//     avatar: {
+//       public_id: result.public_id,
+//       url: result.secure_url,
+//     },
+//   });
+//   sendToken(user, 200, res);
+// };
+
 exports.registerUser = async (req, res, next) => {
-  const result = await cloudinary.uploader.upload(
-    req.body.avatar,
-    {
-      folder: "avatars",
-      width: 150,
-      crop: "scale",
-    },
-    (err, res) => {
-      console.log(err, res);
-    }
-  );
   const { name, department, course, year, email, password } = req.body;
-  const user = await User.create({
-    name,
-    email,
-    password,
-    department,
-    course,
-    year,
-    avatar: {
-      public_id: result.public_id,
-      url: result.secure_url,
-    },
-  });
-  sendToken(user, 200, res);
+
+  // Define default values for avatar
+  const defaultAvatar = {
+    public_id: "avatars/sycaqurx0d18itwbtqcs",
+    url: "https://res.cloudinary.com/dxee38clj/image/upload/v1708606343/avatars/sycaqurx0d18itwbtqcs.png",
+  };
+
+  // Create the user with default avatar values
+  try {
+    const user = await User.create({
+      name,
+      email,
+      password,
+      department,
+      course,
+      year,
+      avatar: defaultAvatar, // Assign the default avatar object
+    });
+
+    sendToken(user, 200, res);
+  } catch (error) {
+    // Handle error
+    console.error("Registration failed:", error);
+    // Send response indicating registration failure
+    res.status(500).json({
+      success: false,
+      error: "Registration failed",
+    });
+  }
 };
 
 exports.loginUser = async (req, res, next) => {
