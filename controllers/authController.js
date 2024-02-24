@@ -5,34 +5,6 @@ const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
 const cloudinary = require("cloudinary").v2;
 
-// exports.registerUser = async (req, res, next) => {
-//   const result = await cloudinary.uploader.upload(
-//     req.body.avatar,
-//     {
-//       folder: "avatars",
-//       width: 150,
-//       crop: "scale",
-//     },
-//     (err, res) => {
-//       console.log(err, res);
-//     }
-//   );
-//   const { name, department, course, year, email, password } = req.body;
-//   const user = await User.create({
-//     name,
-//     email,
-//     password,
-//     department,
-//     course,
-//     year,
-//     avatar: {
-//       public_id: result.public_id,
-//       url: result.secure_url,
-//     },
-//   });
-//   sendToken(user, 200, res);
-// };
-
 exports.registerUser = async (req, res, next) => {
   const { name, department, course, year, email, password } = req.body;
 
@@ -56,7 +28,6 @@ exports.registerUser = async (req, res, next) => {
 
     sendToken(user, 200, res);
   } catch (error) {
-    // Handle error
     console.error("Registration failed:", error);
     // Send response indicating registration failure
     res.status(500).json({
@@ -233,6 +204,21 @@ exports.updateProfile = async (req, res, next) => {
 exports.allUsers = async (req, res, next) => {
   const users = await User.find();
 
+  // Update status for users whose updatedAt is 60 seconds or more behind the current date
+  const currentTime = new Date();
+  const updateThreshold = new Date(currentTime.getTime() - 60000); // 60 seconds ago
+  for (const user of users) {
+    if (
+      user.updatedAt < updateThreshold &&
+      user.status === "inactive" &&
+      user.penalty == 3
+    ) {
+      user.status = "active";
+      user.penalty = 0;
+      await user.save();
+    }
+  }
+
   res.status(200).json({
     success: true,
     users,
@@ -286,44 +272,6 @@ exports.deleteUser = async (req, res, next) => {
     success: true,
   });
 };
-
-// exports.deactivateUser = async (req, res, next) => {
-//   const user = await User.findByIdAndUpdate(
-//     req.params.id,
-//     { status: "inactive" },
-//     { new: true }
-//   );
-
-//   if (!user) {
-//     return next(
-//       new ErrorHandler(`User not found with id: ${req.params.id}`, 404)
-//     );
-//   }
-
-//   res.status(200).json({
-//     success: true,
-//     message: "User deactivated successfully",
-//   });
-// };
-
-// exports.reactivateUser = async (req, res, next) => {
-//   const user = await User.findByIdAndUpdate(
-//     req.params.id,
-//     { status: "active" },
-//     { new: true }
-//   );
-
-//   if (!user) {
-//     return next(
-//       new ErrorHandler(`User not found with id: ${req.params.id}`, 404)
-//     );
-//   }
-
-//   res.status(200).json({
-//     success: true,
-//     message: "User reactivated successfully",
-//   });
-// };
 
 exports.deactivateUser = async (req, res, next) => {
   const user = await User.findByIdAndUpdate(

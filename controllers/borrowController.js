@@ -268,13 +268,70 @@ exports.myBorrowings = async (req, res, next) => {
   });
 };
 
+// exports.allBorrowings = async (req, res, next) => {
+//   const borrowings = await Borrowing.find();
+//   borrowings.forEach((borrowing) => {});
+//   res.status(200).json({
+//     success: true,
+//     borrowings,
+//   });
+// };
+
+// exports.allBorrowings = async (req, res, next) => {
+//   try {
+//     const borrowings = await Borrowing.find();
+//     const updateThreshold = new Date(Date.now() - 60 * 1000);
+
+//     for (const borrowing of borrowings) {
+//       if (
+//         borrowing.createdAt <= updateThreshold &&
+//         borrowing.status === "Pending"
+//       ) {
+//         borrowing.status = "Overdued";
+//         await borrowing.save();
+//       }
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       borrowings,
+//     });
+//   } catch (error) {
+//     next(error); // Forward the error to the error handler middleware
+//   }
+// };
+
 exports.allBorrowings = async (req, res, next) => {
-  const borrowings = await Borrowing.find();
-  borrowings.forEach((borrowing) => {});
-  res.status(200).json({
-    success: true,
-    borrowings,
-  });
+  try {
+    const borrowings = await Borrowing.find();
+    const updateThreshold = new Date(Date.now() - 60 * 1000);
+
+    for (const borrowing of borrowings) {
+      if (
+        borrowing.createdAt <= updateThreshold &&
+        borrowing.status === "Pending"
+      ) {
+        borrowing.status = "Overdued";
+        const historyObj = {
+          user: borrowing.user,
+          borrowItems: borrowing.borrowItems,
+          date_borrow: borrowing.borrowingInfo.date_borrow,
+          date_return: null,
+          status: "Overdued",
+          by: "N/A",
+        };
+        borrowing.history.push(historyObj);
+        await borrowing.save();
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      borrowings,
+    });
+  } catch (error) {
+    next(error); // Forward the error to the error handler middleware
+  }
 };
 
 exports.updateBorrowing = async (req, res, next) => {

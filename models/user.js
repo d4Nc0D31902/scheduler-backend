@@ -69,10 +69,10 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+    // createdAt: {
+    //   type: Date,
+    //   default: Date.now,
+    // },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

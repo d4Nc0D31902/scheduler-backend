@@ -189,9 +189,69 @@ exports.createAppointment = async (req, res, next) => {
 // @route   GET /api/appointments
 // @access  Public (you can define your own access control)
 
+// exports.getAppointments = async (req, res, next) => {
+//   try {
+//     const appointments = await Appointment.find();
+//     res.status(200).json({
+//       success: true,
+//       appointments,
+//     });
+//   } catch (error) {
+//     next(new ErrorHandler("Failed to retrieve appointments", 500));
+//   }
+// };
+
+// exports.getAppointments = async (req, res, next) => {
+//   try {
+//     let appointments = await Appointment.find();
+//     const updateThreshold = new Date(Date.now() - 60 * 1000);
+
+//     for (const appointment of appointments) {
+//       if (
+//         appointment.createdAt <= updateThreshold &&
+//         appointment.status === "Pending"
+//       ) {
+//         appointment.status = "Overdued";
+//         await appointment.save();
+//       }
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       appointments,
+//     });
+//   } catch (error) {
+//     next(new ErrorHandler("Failed to retrieve appointments", 500));
+//   }
+// };
+
 exports.getAppointments = async (req, res, next) => {
   try {
-    const appointments = await Appointment.find();
+    let appointments = await Appointment.find();
+    const updateThreshold = new Date(Date.now() - 60 * 1000);
+
+    for (const appointment of appointments) {
+      if (
+        appointment.createdAt <= updateThreshold &&
+        appointment.status === "Pending"
+      ) {
+        appointment.status = "Overdued";
+        const historyLog = {
+          schedTitle: appointment.title,
+          requester: appointment.requester,
+          description: appointment.description,
+          location: appointment.location,
+          timeStart: appointment.timeStart,
+          timeEnd: appointment.timeEnd,
+          professor: appointment.professor, // Assuming professor is defined somewhere
+          status: "Overdued", // Assuming status is defined somewhere
+          by: "N/A",
+        };
+        appointment.history.push(historyLog);
+        await appointment.save();
+      }
+    }
+
     res.status(200).json({
       success: true,
       appointments,
@@ -284,6 +344,10 @@ exports.updateAppointment = async (req, res, next) => {
 
       user.penalty += 1;
 
+      if (user.penalty === 3) {
+        user.status = "inactive";
+      }
+
       await user.save();
     }
 
@@ -307,31 +371,6 @@ exports.updateAppointment = async (req, res, next) => {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    // const emailOptions = {
-    //   email: user.email,
-    //   subject: "Appointment Update",
-    //   message: `Your appointment has been updated. Details:
-    //     Title: ${title}
-    //     Location: ${location}
-    //     Time Start: ${timeStart}
-    //     Time End: ${timeEnd}
-    //     Status: ${status}
-    //     Professor: ${professor}
-    //     Reason: ${reason}
-    //     Key: ${key}`,
-    //   html: `<p>Your appointment has been updated. Details:</p>
-    //     <ul>
-    //       <li><strong>Title:</strong> ${title}</li>
-    //       <li><strong>Location:</strong> ${location}</li>
-    //       <li><strong>Time Start:</strong> ${timeStart}</li>
-    //       <li><strong>Time End:</strong> ${timeEnd}</li>
-    //       <li><strong>Status:</strong> ${status}</li>
-    //       <li><strong>Professor:</strong> ${professor}</li>
-    //       <li><strong>Reason:</strong> ${reason}</li>
-    //       <li><strong>Key:</strong> ${key}</li>
-    //     </ul>`,
-    // };
-
     const emailOptions = {
       email: user.email,
       subject: "Appointment Update",
@@ -345,17 +384,6 @@ exports.updateAppointment = async (req, res, next) => {
         Professor: ${professor}
         Reason: ${reason}
         Key: ${key}`,
-      // html: `<p style="font-weight: bold;">Your appointment has been updated. Details:</p>
-      //   <ul style="list-style-type: none; padding: 0;">
-      //     <li><strong>Title:</strong> ${title}</li>
-      //     <li><strong>Location:</strong> ${location}</li>
-      //     <li><strong>Time Start:</strong> ${timeStart}</li>
-      //     <li><strong>Time End:</strong> ${timeEnd}</li>
-      //     <li><strong>Status:</strong> ${status}</li>
-      //     <li><strong>Professor:</strong> ${professor}</li>
-      //     <li><strong>Reason:</strong> ${reason}</li>
-      //     <li><strong>Key:</strong> ${key}</li>
-      //   </ul>`,
       html: `
       <div class="wrap" style="max-width: 600px; margin: 0 auto;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff"
