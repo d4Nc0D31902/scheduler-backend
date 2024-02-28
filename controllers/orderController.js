@@ -168,19 +168,56 @@ exports.myOrders = async (req, res, next) => {
   });
 };
 
-exports.allOrders = async (req, res, next) => {
-  const orders = await Order.find();
-  // console.log(orders)
-  let totalAmount = 0;
-  orders.forEach((order) => {
-    totalAmount += order.totalPrice;
-  });
+// exports.allOrders = async (req, res, next) => {
+//   const orders = await Order.find();
+//   // console.log(orders)
+//   let totalAmount = 0;
+//   orders.forEach((order) => {
+//     totalAmount += order.totalPrice;
+//   });
 
-  res.status(200).json({
-    success: true,
-    totalAmount,
-    orders,
-  });
+//   res.status(200).json({
+//     success: true,
+//     totalAmount,
+//     orders,
+//   });
+// };
+
+exports.allOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find();
+    const updateThreshold = new Date(Date.now() - 60 * 1000);
+
+    let totalAmount = 0;
+    orders.forEach((order) => {
+      totalAmount += order.totalPrice;
+
+      if (order.createdAt <= updateThreshold && order.orderStatus === "Pending") {
+        order.orderStatus = "Overdued";
+        const historyRecord = {
+          customer: order.customer,
+          orderItems: order.orderItems,
+          totalPrice: order.totalPrice,
+          orderStatus: "Overdued",
+          paymentMeth: order.paymentMeth,
+          reference_num: order.reference_num,
+          by: "N/A",
+          createdAt: order.createdAt,
+        };
+
+        order.history.push(historyRecord);
+        order.save();
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      totalAmount,
+      orders,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.updateOrder = async (req, res, next) => {

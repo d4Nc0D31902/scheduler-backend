@@ -330,7 +330,7 @@ exports.allBorrowings = async (req, res, next) => {
       borrowings,
     });
   } catch (error) {
-    next(error); // Forward the error to the error handler middleware
+    next(error); 
   }
 };
 
