@@ -1,6 +1,7 @@
 const Appointment = require("../models/appointment");
 const ErrorHandler = require("../utils/errorHandler");
 const User = require("../models/user");
+const Notification = require("../models/notification");
 const mongoose = require("mongoose");
 const sendEmail = require("../utils/sendEmail");
 const cloudinary = require("cloudinary");
@@ -22,7 +23,7 @@ exports.createAppointment = async (req, res, next) => {
       professor,
       status,
       key,
-      screenShot, // Add screenShot to the destructured request body
+      screenShot,
     } = req.body;
 
     let requester = "";
@@ -81,8 +82,23 @@ exports.createAppointment = async (req, res, next) => {
 
     await newAppointment.save();
 
-    // Construct email notification for the appointment
-    // Include screenshot links in the email if necessary
+    const requesterNotification = new Notification({
+      message: `Your Schedule has been requested titled: ${title}`,
+      user: req.user._id,
+    });
+    await requesterNotification.save();
+
+    const adminsAndOfficers = await User.find({
+      role: { $in: ["admin", "officer"] },
+    });
+    for (const user of adminsAndOfficers) {
+      const adminOfficerNotification = new Notification({
+        message: "A schedule has been requested",
+        user: user._id,
+      });
+      await adminOfficerNotification.save();
+    }
+
     const emailOptions = {
       email: req.user.email,
       subject: "Schedule Request",
@@ -189,46 +205,11 @@ exports.createAppointment = async (req, res, next) => {
 // @route   GET /api/appointments
 // @access  Public (you can define your own access control)
 
-// exports.getAppointments = async (req, res, next) => {
-//   try {
-//     const appointments = await Appointment.find();
-//     res.status(200).json({
-//       success: true,
-//       appointments,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to retrieve appointments", 500));
-//   }
-// };
-
-// exports.getAppointments = async (req, res, next) => {
-//   try {
-//     let appointments = await Appointment.find();
-//     const updateThreshold = new Date(Date.now() - 60 * 1000);
-
-//     for (const appointment of appointments) {
-//       if (
-//         appointment.createdAt <= updateThreshold &&
-//         appointment.status === "Pending"
-//       ) {
-//         appointment.status = "Overdued";
-//         await appointment.save();
-//       }
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       appointments,
-//     });
-//   } catch (error) {
-//     next(new ErrorHandler("Failed to retrieve appointments", 500));
-//   }
-// };
-
 exports.getAppointments = async (req, res, next) => {
   try {
     let appointments = await Appointment.find();
-    const updateThreshold = new Date(Date.now() - 60 * 1000);
+    // const updateThreshold = new Date(Date.now() - 60 * 1000);
+    const updateThreshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     for (const appointment of appointments) {
       if (
@@ -364,6 +345,12 @@ exports.updateAppointment = async (req, res, next) => {
     appointment.history.push(historyLog);
 
     await appointment.save();
+
+    const requesterNotification = new Notification({
+      message: `Your Schedule has been Updated titled: ${title}`,
+      user: appointment.userId,
+    });
+    await requesterNotification.save();
 
     // Fetch user's email from the User model using appointment.userId
     const user = await User.findById(appointment.userId);

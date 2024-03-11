@@ -13,6 +13,7 @@ const categories = require("./routes/category");
 const borrows = require("./routes/borrow");
 const auth = require("./routes/auth");
 const order = require("./routes/order");
+const notifications = require("./routes/notification");
 const errorMiddleware = require("./middlewares/errors");
 app.use(express.json({ limit: "100mb" }));
 // app.set("trust proxy", 1);
@@ -40,6 +41,7 @@ app.use("/api/v1", equipments);
 app.use("/api/v1", sports);
 app.use("/api/v1", categories);
 app.use("/api/v1", borrows);
+app.use("/api/v1", notifications);
 
 app.use(errorMiddleware);
 module.exports = app;

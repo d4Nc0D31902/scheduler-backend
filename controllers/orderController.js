@@ -3,6 +3,7 @@ const Product = require("../models/product");
 const User = require("../models/user");
 const cloudinary = require("cloudinary");
 const sendEmail = require("../utils/sendEmail");
+const Notification = require("../models/notification");
 
 const ErrorHandler = require("../utils/errorHandler");
 const mongoose = require("mongoose");
@@ -63,6 +64,23 @@ exports.newOrder = async (req, res, next) => {
         },
       ],
     });
+
+    const requesterNotification = new Notification({
+      message: `Your Order has been Placed`,
+      user: req.user._id,
+    });
+    await requesterNotification.save();
+
+    const adminsAndOfficers = await User.find({
+      role: { $in: ["admin", "officer"] },
+    });
+    for (const user of adminsAndOfficers) {
+      const adminOfficerNotification = new Notification({
+        message: "New Order has been Placed!",
+        user: user._id,
+      });
+      await adminOfficerNotification.save();
+    }
 
     // Fetch user's email from the User model
     // const user = await User.findById(req.user._id);
@@ -192,7 +210,10 @@ exports.allOrders = async (req, res, next) => {
     orders.forEach((order) => {
       totalAmount += order.totalPrice;
 
-      if (order.createdAt <= updateThreshold && order.orderStatus === "Pending") {
+      if (
+        order.createdAt <= updateThreshold &&
+        order.orderStatus === "Pending"
+      ) {
         order.orderStatus = "Overdued";
         const historyRecord = {
           customer: order.customer,
@@ -247,6 +268,12 @@ exports.updateOrder = async (req, res, next) => {
     }
 
     await order.save();
+
+    const requesterNotification = new Notification({
+      message: `Your Order has been Updated`,
+      user: order.user,
+    });
+    await requesterNotification.save();
 
     order.history.push(historyRecord);
     await order.save();

@@ -2,6 +2,7 @@ const Borrowing = require("../models/borrowing");
 const Equipment = require("../models/equipment");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/user");
+const Notification = require("../models/notification");
 
 const ErrorHandler = require("../utils/errorHandler");
 const mongoose = require("mongoose");
@@ -107,6 +108,23 @@ exports.newBorrowing = async (req, res, next) => {
       },
     ],
   });
+
+  const requesterNotification = new Notification({
+    message: `Your Borrowing Equipment has been requested`,
+    user: req.user._id,
+  });
+  await requesterNotification.save();
+
+  const adminsAndOfficers = await User.find({
+    role: { $in: ["admin", "officer"] },
+  });
+  for (const user of adminsAndOfficers) {
+    const adminOfficerNotification = new Notification({
+      message: "Borrowing Equipment has been requested",
+      user: user._id,
+    });
+    await adminOfficerNotification.save();
+  }
 
   // Construct email notification with borrowing information
   const emailOptions = {
@@ -330,7 +348,7 @@ exports.allBorrowings = async (req, res, next) => {
       borrowings,
     });
   } catch (error) {
-    next(error); 
+    next(error);
   }
 };
 
@@ -366,6 +384,12 @@ exports.updateBorrowing = async (req, res, next) => {
 
       await equipment.save();
     }
+
+    const requesterNotification = new Notification({
+      message: `Your Borrowing Request has been Updated`,
+      user: borrowing.userId,
+    });
+    await requesterNotification.save();
 
     const historyObj = {
       user: borrowing.user,
