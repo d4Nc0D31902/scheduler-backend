@@ -111,6 +111,7 @@ exports.newBorrowing = async (req, res, next) => {
 
   const requesterNotification = new Notification({
     message: `Your Borrowing Equipment has been requested`,
+    type: "created",
     user: req.user._id,
   });
   await requesterNotification.save();
@@ -121,6 +122,7 @@ exports.newBorrowing = async (req, res, next) => {
   for (const user of adminsAndOfficers) {
     const adminOfficerNotification = new Notification({
       message: "Borrowing Equipment has been requested",
+      type: "created",
       user: user._id,
     });
     await adminOfficerNotification.save();
@@ -387,6 +389,7 @@ exports.updateBorrowing = async (req, res, next) => {
 
     const requesterNotification = new Notification({
       message: `Your Borrowing Request has been Updated`,
+      type: "updated",
       user: borrowing.userId,
     });
     await requesterNotification.save();

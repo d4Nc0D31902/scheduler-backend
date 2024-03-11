@@ -6,7 +6,10 @@ const notificationSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      default:"unread"
+      default: "unread",
+    },
+    type: {
+      type: String,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

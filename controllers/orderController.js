@@ -67,6 +67,7 @@ exports.newOrder = async (req, res, next) => {
 
     const requesterNotification = new Notification({
       message: `Your Order has been Placed`,
+      type: "created",
       user: req.user._id,
     });
     await requesterNotification.save();
@@ -77,6 +78,7 @@ exports.newOrder = async (req, res, next) => {
     for (const user of adminsAndOfficers) {
       const adminOfficerNotification = new Notification({
         message: "New Order has been Placed!",
+        type: "created",
         user: user._id,
       });
       await adminOfficerNotification.save();
@@ -271,6 +273,7 @@ exports.updateOrder = async (req, res, next) => {
 
     const requesterNotification = new Notification({
       message: `Your Order has been Updated`,
+      type: "updated",
       user: order.user,
     });
     await requesterNotification.save();

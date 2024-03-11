@@ -84,6 +84,7 @@ exports.createAppointment = async (req, res, next) => {
 
     const requesterNotification = new Notification({
       message: `Your Schedule has been requested titled: ${title}`,
+      type: "created",
       user: req.user._id,
     });
     await requesterNotification.save();
@@ -94,6 +95,7 @@ exports.createAppointment = async (req, res, next) => {
     for (const user of adminsAndOfficers) {
       const adminOfficerNotification = new Notification({
         message: "A schedule has been requested",
+        type: "created",
         user: user._id,
       });
       await adminOfficerNotification.save();
@@ -348,6 +350,7 @@ exports.updateAppointment = async (req, res, next) => {
 
     const requesterNotification = new Notification({
       message: `Your Schedule has been Updated titled: ${title}`,
+      type: "updated",
       user: appointment.userId,
     });
     await requesterNotification.save();
