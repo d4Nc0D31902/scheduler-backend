@@ -1,5 +1,6 @@
 const Announcement = require("../models/announcement");
 const ErrorHandler = require("../utils/errorHandler");
+const Notification = require("../models/notification");
 const User = require("../models/user");
 const cloudinary = require("cloudinary");
 
@@ -51,6 +52,13 @@ exports.createAnnouncement = async (req, res, next) => {
       body: req.body.body,
       images: imagesLinks,
     });
+
+    const requesterNotification = new Notification({
+      message: `New Announcement!`,
+      type: "created",
+      user: req.user._id,
+    });
+    await requesterNotification.save();
 
     res.status(201).json({
       success: true,
